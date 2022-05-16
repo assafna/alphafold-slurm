@@ -1,0 +1,60 @@
+#!/bin/bash
+#SBATCH --output %x-%j.out
+#SBATCH --error %x-%j.err
+#SBATCH --ntasks 1
+#SBATCH --gpus-per-task 1
+
+# paths
+CONTAINER_PATH=<path to alphafold.sqsh>
+DATA_DIR=<path to downloaded databases directory>
+OUTPUT_DIR=<path to outputs directory>
+FASTA_DIR=<path to FASTA files directory>
+
+# config
+FASTA_PATH=T1050.fasta
+MAX_TEMPLATE_DATE=2020-05-14
+
+# GPU configuration
+TF_FORCE_UNIFIED_MEMORY=1
+XLA_PYTHON_CLIENT_MEM_FRACTION=4.0
+
+# running options
+RUN_OPTIONS='--fasta_paths /fasta/${FASTA_PATH} \
+--uniref90_database_path /data/uniref90/uniref90.fasta \
+--mgnify_database_path /data/mgnify/mgy_clusters_2018_12.fa \
+--data_dir /data \
+--template_mmcif_dir /data/pdb_mmcif/mmcif_files \
+--obsolete_pdbs_path /data/pdb_mmcif/obsolete.dat \
+--output_dir /output/${SLURM_JOBID} \
+--max_template_date ${MAX_TEMPLATE_DATE} \
+--benchmark false \
+--use_precomputed_msas false \
+--run_relax true \
+--use_gpu_relax true \
+--logtostderr'
+
+# preset running options
+RUN_OPTIONS_NOT_MULTIMER='--model_preset monomer \
+--pdb70_database_path /data/pdb70/pdb70'
+RUN_OPTIONS_MULTIMER='--model_preset multimer \
+--uniprot_database_path /data/uniprot/uniprot.fasta \
+--pdb_seqres_database_path /data/pdb_seqres/pdb_seqres.txt \
+--num_multimer_predictions_per_model 5'
+
+# DBs running options
+RUN_OPTIONS_FULL_DBS='--db_preset full_dbs \
+--uniclust30_database_path /data/uniclust30/uniclust30_2018_08/uniclust30_2018_08 \
+--bfd_database_path /data/bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
+RUN_OPTIONS_REDUCED_DBS='--db_preset reduced_dbs \
+--small_bfd_database_path /data/small_bfd/first_non_consensus_sequences.fasta'
+
+# final running options
+FINAL_RUN_OPTIONS=RUN_OPTIONS + RUN_OPTIONS_NOT_MULTIMER + RUN_OPTIONS_FULL_DBS
+MOUNTS=${DATA_DIR}:/data,${OUTPUT_DIR}:/output,${FASTA_DIR}:/fasta
+
+# run command
+srun --container-image ${CONTAINER_PATH} \
+--container-mounts ${MOUNTS} \
+--no-container-entrypoint \
+/bin/bash -c \
+'/app/run_alphafold.sh ${FINAL_RUN_OPTIONS}'
