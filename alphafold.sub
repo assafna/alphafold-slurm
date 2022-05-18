@@ -5,10 +5,10 @@
 #SBATCH --gpus-per-task 1
 
 # paths
-CONTAINER_PATH=/dlc/sw/ATP/assaf/alphafold/alphafold.sqsh
-DATA_DIR=/dlc/sw/ATP/alphafold/data
-OUTPUT_DIR=/dlc/sw/ATP/assaf/alphafold/output
-FASTA_DIR=/dlc/sw/ATP/alphafold/data
+CONTAINER_PATH=<path to alphafold.sqsh>
+DATA_DIR=<path to downloaded databases directory>
+OUTPUT_DIR=<path to outputs directory>
+FASTA_DIR=<path to FASTA files directory>
 
 # config
 FASTA_PATH=T1050.fasta
