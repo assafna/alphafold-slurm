@@ -20,9 +20,16 @@ Slurm uses a [squash](https://en.wikipedia.org/wiki/SquashFS) file to run. There
 
 2. __Optional:__ modify the Dockerfile to include the latest versions.
 
-    Replace [`docker/Dockerfile`](https://github.com/deepmind/alphafold/blob/main/docker/Dockerfile) with the provided modified [Dockerfile](Dockerfile).
+    Open the [`docker/Dockerfile`](https://github.com/deepmind/alphafold/blob/main/docker/Dockerfile) file for editing and replace with the following:
 
-    __Note:__ this modified Dockerfile assumes you have CUDA version 11.4 installed with Ubuntu 20.04. If this is not the case, please change the relevant lines.
+    - Line 15 - `ARG CUDA=<CUDA driver version>`
+    - Line 16 - `FROM nvidia/cuda:<CUDA driver version>-cudnn<cuDNN version>-runtime-ubuntu<Ubuntu version>`
+    - Line 56 - `cudatoolkit \`
+    - Line 68 - `&& pip3 install --upgrade jax jaxlib -f \`
+
+    __Notes:__
+    - CUDA driver version can be found by running `nvidia-smi`.
+    - CUDA cuDNN relevant images can found in [NVIDIA CUDA Docker Hub](https://hub.docker.com/r/nvidia/cuda/tags?page=1&name=cudnn).
 
 3. Build a Docker image.
 
