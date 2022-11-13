@@ -15,30 +15,53 @@ Slurm uses a [squash](https://en.wikipedia.org/wiki/SquashFS) file to run. There
 1. Git clone AlphaFold's GitHub repository.
 
     ```bash
-    git clone https://github.com/deepmind/alphafold.git
+    git clone https://github.com/deepmind/alphafold
     ```
 
 2. __Optional:__ modify the Dockerfile to include the latest versions.
 
     Open the [`docker/Dockerfile`](https://github.com/deepmind/alphafold/blob/main/docker/Dockerfile) file for editing and replace with the following:
 
-    - Line 15 - `ARG CUDA=<CUDA driver version>` (e.g., `ARG CUDA=11.5`)
-    - Line 16 - `FROM nvidia/cuda:<CUDA driver version>-cudnn<cuDNN version>-runtime-ubuntu<Ubuntu version>` (e.g., `FROM nvidia/cuda:11.5.2-cudnn8-runtime-ubuntu20.04`)
-    - Line 56 - `cudatoolkit \`
-    - Line 69 - `jax \`
-    - Line 70 - `jaxlib \`
+    - Line 15 - set the correct CUDA driver version:
 
-    __Notes:__
-    - CUDA driver version can be found by running `nvidia-smi`.
-    - CUDA cuDNN relevant images can found in [NVIDIA's CUDA Docker Hub](https://hub.docker.com/r/nvidia/cuda/tags?page=1&name=cudnn).
+        ```bash
+        ARG CUDA=<CUDA driver version> #e.g., 11.4
+        ```
 
-3. Build a Docker image.
+        - __Note:__ CUDA driver version can be found by running `nvidia-smi` on a compute node.
+    - Line 16 - set the latest suitable cuDNN version:
+
+        ```bash
+        FROM nvidia/cuda:<CUDA driver version>-cudnn<cuDNN version>-runtime-ubuntu<Ubuntu version> #e.g., nvidia/cuda:11.4.3-cudnn8-runtime-ubuntu20.04
+        ```
+
+        - __Note:__ CUDA cuDNN relevant images can found in [NVIDIA's CUDA Docker Hub](https://hub.docker.com/r/nvidia/cuda/tags?page=1&name=cudnn). Search for the latest version based on the CUDA driver version.
+    - Line 59 - remove CUDA toolkit specific version:
+
+        ```bash
+        cudatoolkit \
+        ```
+
+    - Line 73 - remove jax specific version:
+
+        ```bash
+        jax \
+        ```
+
+    - Line 74 - remove jaxlib specific version:
+
+        ```bash
+        jaxlib \
+        ```
+
+3. Build a Docker image:
 
     ```bash
+    cd <path to AlphaFold GitHub directory>
     docker build -f docker/Dockerfile -t alphafold .
     ```
 
-4. Convert the Docker image into a Squash file using [NVIDIA Enroot](https://github.com/NVIDIA/enroot).
+4. Convert the Docker image into a Squash file using [NVIDIA Enroot](https://github.com/NVIDIA/enroot):
 
     ```bash
     enroot import "dockerd://alphafold:latest"
